@@ -8,6 +8,8 @@ with that configuration. Higher layers (CLI, API, agent) build on top of the
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from ragforge.config import Settings
 from ragforge.config import settings as default_settings
 from ragforge.embeddings import build_embedder
@@ -28,6 +30,24 @@ class Pipeline:
         self.embedder = build_embedder(self.settings)
         self.store = InMemoryVectorStore(dim=self.embedder.dim)
         self.retriever = Retriever(self.embedder, self.store)
+
+    @classmethod
+    def from_index(cls, path: str | Path, settings: Settings | None = None) -> Pipeline:
+        """Build a pipeline whose store is loaded from a saved index file.
+
+        The configured embedder must match the index's dimensionality, since a
+        query is only comparable to vectors produced by the same embedder.
+        """
+        pipeline = cls(settings)
+        store = InMemoryVectorStore.load(path)
+        if store.dim != pipeline.embedder.dim:
+            raise ValueError(
+                f"index dim {store.dim} != embedder dim {pipeline.embedder.dim}; "
+                "re-ingest with the current embedding configuration"
+            )
+        pipeline.store = store
+        pipeline.retriever = Retriever(pipeline.embedder, store)
+        return pipeline
 
     def ingest(self, documents: list[Document]) -> int:
         """Chunk and index documents; returns the number of chunks indexed."""

@@ -24,14 +24,15 @@ RAG, LLM tool use, evals, API/CLI, testing, CI, and C4 architecture docs.
 - [x] CLI: `ingest` + `query`
 - [x] Tests for chunking, embeddings, store, retrieval
 
-### M2 — LLM & agent layer (Claude)
-- [ ] `llm/base.py` — `LLM` protocol + `Message`/`Completion` types
-- [ ] `llm/anthropic_client.py` — Claude via Anthropic SDK (adaptive thinking, effort)
-- [ ] `llm/mock.py` — deterministic offline LLM for tests
-- [ ] `agent/rag_agent.py` — retrieve→prompt→answer with inline citations
-- [ ] Tool-use loop: model calls a `search_corpus` tool on demand
-- [ ] CLI `ask` subcommand (uses agent; falls back to retrieval if no key)
-- [ ] Tests with the mock LLM (no network)
+### M2 — LLM & agent layer (Claude) ✅
+- [x] `llm/base.py` — `LLM` protocol + `ToolSpec`/`ToolCall`/`LLMResponse` types
+- [x] `llm/anthropic_client.py` — Claude via Anthropic SDK (adaptive thinking, effort)
+- [x] `llm/mock.py` — deterministic offline LLM for tests
+- [x] `agent/rag_agent.py` — bounded tool-use loop, answer with citations
+- [x] Tool-use loop: model calls a `search_corpus` tool on demand
+- [x] CLI `ask` subcommand (Claude when key set, else offline mock)
+- [x] `Pipeline.from_index` to load a saved index for answering
+- [x] Tests with the mock LLM (no network) — 30 tests total
 
 ### M3 — Evaluation harness
 - [ ] `eval/dataset.py` — QA dataset schema + loader (JSONL)
@@ -64,3 +65,7 @@ RAG, LLM tool use, evals, API/CLI, testing, CI, and C4 architecture docs.
 ## Build log
 - 2026-06-12 — M1 complete: retrieval core (ingest → embed → store → retrieve),
   CLI, and test suite. Repo initialised and pushed. Next: M2 (Claude agent layer).
+- 2026-06-12 — M2 complete: provider-agnostic LLM contract, Claude client
+  (adaptive thinking + effort), deterministic offline MockLLM, agentic
+  search-and-answer loop with citations, `ask` CLI, `Pipeline.from_index`.
+  30 tests green, lint clean. Next: M3 (evaluation harness).

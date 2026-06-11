@@ -3,10 +3,11 @@
 Subcommands:
     ingest   Load a file or directory and build an on-disk index.
     query    Retrieve the most relevant chunks for a question from an index.
+    ask      Answer a question with the agent (Claude when a key is set, else
+             a deterministic offline stand-in), citing the corpus.
 
-The CLI deliberately stays at the retrieval layer so it works with zero
-configuration and no API key; the agent layer (Claude-backed answers) builds on
-the same index format.
+``ingest`` and ``query`` work with zero configuration and no API key; ``ask``
+adds the agent layer on top of the same index format.
 """
 
 from __future__ import annotations
@@ -61,6 +62,27 @@ def _cmd_query(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_ask(args: argparse.Namespace) -> int:
+    from ragforge.agent import RagAgent
+    from ragforge.llm import build_llm
+    from ragforge.pipeline import Pipeline
+
+    try:
+        pipeline = Pipeline.from_index(args.index)
+    except (FileNotFoundError, ValueError) as exc:
+        log.error("%s", exc)
+        return 1
+    agent = RagAgent(pipeline, build_llm(settings))
+    answer = agent.answer(args.question)
+    print(answer.text)
+    if answer.citations:
+        print("\nSources:")
+        for i, c in enumerate(answer.citations[: args.top_k], start=1):
+            print(f"  [{i}] doc={c.chunk.doc_id}  score={c.score:.4f}")
+    log.info("answered with model=%s", answer.model)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="ragforge", description=__doc__)
     parser.add_argument("--log-level", default=settings.log_level)
@@ -76,6 +98,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_query.add_argument("--index", default=_DEFAULT_INDEX, help="index path to search")
     p_query.add_argument("--top-k", type=int, default=settings.top_k)
     p_query.set_defaults(func=_cmd_query)
+
+    p_ask = sub.add_parser("ask", help="answer a question with the RAG agent")
+    p_ask.add_argument("question", help="the question to answer")
+    p_ask.add_argument("--index", default=_DEFAULT_INDEX, help="index path to search")
+    p_ask.add_argument("--top-k", type=int, default=settings.top_k)
+    p_ask.set_defaults(func=_cmd_ask)
     return parser
 
 
