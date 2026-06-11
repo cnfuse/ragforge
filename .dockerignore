@@ -1,0 +1,14 @@
+.venv/
+.git/
+.github/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+__pycache__/
+*.pyc
+tests/
+docs/
+data/local/
+*.ragforge_index.json
+.env
+.env.*

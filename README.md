@@ -64,7 +64,43 @@ ragforge ingest ./docs --index my_index.json
 
 # Ask the index for the most relevant passages
 ragforge query "how does chunking work?" --index my_index.json --top-k 5
+
+# Let the agent answer (Claude if ANTHROPIC_API_KEY is set, else offline mock)
+ragforge ask "how does chunking work?" --index my_index.json
 ```
+
+## Evaluation
+
+Retrieval and answer quality are measured, not assumed:
+
+```bash
+ragforge eval --corpus data/sample/corpus --dataset data/sample/qa.jsonl --top-k 3
+# retrieval: hit_rate@3=1.000  recall@3=1.000  mrr=1.000  ndcg@3=1.000
+# answers:   expected_match=0.750  grounding=0.887
+```
+
+Metrics: hit-rate, recall@k, MRR, nDCG for retrieval; expected-substring match
+and citation grounding for answers. Add `--json-out report.json` for a full
+per-query report.
+
+## HTTP API
+
+```bash
+pip install -e ".[api]"
+uvicorn ragforge.api.app:app --reload          # http://127.0.0.1:8000/docs
+
+# or with Docker
+docker build -t ragforge . && docker run -p 8000:8000 ragforge
+```
+
+| Method | Path      | Purpose                                   |
+| ------ | --------- | ----------------------------------------- |
+| GET    | `/health` | Liveness, index size, model info          |
+| POST   | `/ingest` | Add documents to the index                |
+| POST   | `/query`  | Retrieve relevant chunks                  |
+| POST   | `/ask`    | Answer a question with the agent          |
+
+Interactive OpenAPI docs are served at `/docs`.
 
 ## Configuration
 

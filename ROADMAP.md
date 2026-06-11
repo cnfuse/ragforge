@@ -43,11 +43,12 @@ RAG, LLM tool use, evals, API/CLI, testing, CI, and C4 architecture docs.
 - [x] CLI `eval` subcommand + sample corpus & dataset under `data/sample/`
 - [x] Tests for metrics + runner on synthetic data (40 tests total)
 
-### M4 — Service layer
-- [ ] `api/app.py` — FastAPI: `/health`, `/ingest`, `/query`, `/ask`
-- [ ] Pydantic request/response schemas
-- [ ] API tests via `httpx`/`TestClient`
-- [ ] `Dockerfile` + container docs
+### M4 — Service layer ✅
+- [x] `api/app.py` — FastAPI factory: `/health`, `/ingest`, `/query`, `/ask`
+- [x] Pydantic request/response schemas (`api/schemas.py`)
+- [x] API tests via `TestClient` (7 tests, incl. validation + OpenAPI)
+- [x] Multi-stage `Dockerfile` (non-root, healthcheck) + `.dockerignore`
+- [x] README: API + Docker + eval usage documented
 
 ### M5 — Docs & polish
 - [ ] C4 docs: context, container, component, code (`docs/architecture/`)
@@ -75,3 +76,7 @@ RAG, LLM tool use, evals, API/CLI, testing, CI, and C4 architecture docs.
   typed report, runner, and `eval` CLI with a sample corpus/dataset. On the
   sample set: retrieval 1.000 across the board, grounding 0.887. 40 tests
   green, lint clean. Next: M4 (FastAPI service).
+- 2026-06-12 — M4 complete: FastAPI service (/health, /ingest, /query, /ask)
+  with pydantic schemas and OpenAPI docs, TestClient suite, multi-stage
+  Dockerfile (non-root + healthcheck), README API/Docker docs. 47 tests green,
+  lint clean. Next: M5 (C4 architecture docs + polish).
