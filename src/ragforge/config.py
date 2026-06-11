@@ -46,6 +46,7 @@ class Settings(BaseSettings):
 
     # --- Reranking (optional second stage) --------------------------------
     rerank_enabled: bool = False
+    rerank_provider: str = "lexical"  # lexical | llm
     rerank_alpha: float = 0.5  # weight on embedding score vs BM25 in the blend
     rerank_fetch_multiplier: int = 4  # first-pass candidates = top_k * this
 

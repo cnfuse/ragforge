@@ -12,12 +12,20 @@ from __future__ import annotations
 from ragforge.config import Settings
 from ragforge.rerank.base import Reranker
 from ragforge.rerank.lexical import LexicalReranker
+from ragforge.rerank.llm_reranker import LLMReranker
 
-__all__ = ["Reranker", "LexicalReranker", "build_reranker"]
+__all__ = ["Reranker", "LexicalReranker", "LLMReranker", "build_reranker"]
 
 
 def build_reranker(settings: Settings) -> Reranker | None:
     """Return a reranker if enabled in settings, else ``None`` (single-stage)."""
     if not settings.rerank_enabled:
         return None
-    return LexicalReranker(alpha=settings.rerank_alpha)
+    provider = settings.rerank_provider.lower()
+    if provider == "lexical":
+        return LexicalReranker(alpha=settings.rerank_alpha)
+    if provider == "llm":
+        from ragforge.llm import build_llm
+
+        return LLMReranker(build_llm(settings))
+    raise ValueError(f"Unknown rerank provider: {settings.rerank_provider!r}")

@@ -22,6 +22,12 @@ candidate set (rare-term weighting + length normalisation) and blends it,
 min-max-normalised, with the first-pass embedding score via a tunable `alpha`
 (weight on embeddings vs. BM25). It is local and deterministic.
 
+A second implementation, `LLMReranker`, asks the language model to judge each
+candidate's relevance in a single structured-JSON call (Claude-as-judge),
+falling back to first-pass order if the output can't be parsed. Both satisfy the
+same `Reranker` protocol and are selected by `rerank_provider`
+(`lexical` | `llm`).
+
 Reranking is **off by default** (`rerank_enabled=False`) so existing behaviour
 and the single-stage tests are unchanged; it is opt-in via configuration.
 

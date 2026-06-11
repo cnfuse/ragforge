@@ -68,9 +68,11 @@ extend it — candidate work below.
       `LexicalReranker`, optional two-stage retrieval, config-driven
 - [x] Tighten mypy to fully strict and make it blocking in CI
 - [x] `examples/quickstart.py` — runnable end-to-end demo (ingest→query→ask→eval)
+- [x] Optional LLM reranker (`LLMReranker`, Claude-as-judge) on the same protocol;
+      selected via `rerank_provider`
 - [ ] Streaming `/ask` (SSE) and CLI streaming output
 - [ ] Coverage gate (fail under threshold) once suite is broad enough
-- [ ] Optional LLM/cross-encoder reranker implementing the same protocol
+- [ ] Cross-encoder reranker variant
 
 ## Working agreement (for autonomous sessions)
 1. Read this file first; pick the next unchecked item(s).
@@ -109,3 +111,7 @@ extend it — candidate work below.
   startup + auto-save after ingest + `/save` endpoint); runnable
   `examples/quickstart.py` end-to-end demo (ASCII-safe output). 63 tests green,
   ruff + mypy clean. Next: streaming `/ask`, coverage gate.
+- 2026-06-12 — M6 (part 3): `LLMReranker` (Claude-as-judge, single structured
+  JSON call, safe fallback) behind the same `Reranker` protocol; selectable via
+  `rerank_provider=lexical|llm`. ADR 0004 updated. 72 tests green, ruff + mypy
+  clean. Next: streaming `/ask`, coverage gate.
