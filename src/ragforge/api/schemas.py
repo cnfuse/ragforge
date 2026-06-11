@@ -62,8 +62,15 @@ class AskResponse(BaseModel):
     citations: list[Citation]
 
 
+class SaveResponse(BaseModel):
+    saved: bool
+    path: str | None = None
+    total_chunks: int
+
+
 class HealthResponse(BaseModel):
     status: str
     indexed_chunks: int
     model: str
     live_llm: bool
+    index_path: str | None = None

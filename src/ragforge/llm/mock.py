@@ -70,7 +70,7 @@ class MockLLM:
         if results:
             snippet = results[0].strip().replace("\n", " ")
             if len(snippet) > 280:
-                snippet = snippet[:280].rsplit(" ", 1)[0] + "…"
+                snippet = snippet[:280].rsplit(" ", 1)[0] + "..."
             if snippet:
                 answer = f"Based on the retrieved context: {snippet}"
             else:

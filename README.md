@@ -54,6 +54,13 @@ Full C4 model (Context → Container → Component → Code), with Mermaid diagr
 lives in [`docs/architecture/`](docs/architecture/); design decisions are
 recorded as ADRs in [`docs/adr/`](docs/adr/).
 
+## Try it in 10 seconds
+
+```bash
+pip install -e ".[dev,api]"
+python examples/quickstart.py     # ingest → query → ask → evaluate, fully offline
+```
+
 ## Install
 
 ```bash
@@ -106,8 +113,11 @@ docker build -t ragforge . && docker run -p 8000:8000 ragforge
 | POST   | `/ingest` | Add documents to the index                |
 | POST   | `/query`  | Retrieve relevant chunks                  |
 | POST   | `/ask`    | Answer a question with the agent          |
+| POST   | `/save`   | Persist the current index to disk         |
 
-Interactive OpenAPI docs are served at `/docs`.
+Interactive OpenAPI docs are served at `/docs`. Set `RAGFORGE_INDEX_PATH` to make
+the index durable: the service loads it on startup and auto-saves after each
+ingest, so it survives restarts.
 
 ## Configuration
 

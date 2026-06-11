@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     host: str = "127.0.0.1"
     port: int = 8000
+    # Optional on-disk index. If set, the API loads it on startup (when present)
+    # and persists to it after each ingest, so the service survives restarts.
+    index_path: str | None = None
 
     @property
     def has_live_llm(self) -> bool:

@@ -62,12 +62,13 @@ The originally scoped platform is built. Future autonomous sessions harden and
 extend it — candidate work below.
 
 ### M6 — Hardening & extensions (backlog)
-- [ ] Persisted index reuse in the API (`/ingest` append + optional disk index)
+- [x] Persisted index reuse in the API — `RAGFORGE_INDEX_PATH` load-on-startup,
+      auto-save after ingest, `/save` endpoint
 - [x] Reranking stage behind a `Reranker` protocol — hybrid BM25+embedding
       `LexicalReranker`, optional two-stage retrieval, config-driven
 - [x] Tighten mypy to fully strict and make it blocking in CI
+- [x] `examples/quickstart.py` — runnable end-to-end demo (ingest→query→ask→eval)
 - [ ] Streaming `/ask` (SSE) and CLI streaming output
-- [ ] `examples/` notebook or script demonstrating an end-to-end run
 - [ ] Coverage gate (fail under threshold) once suite is broad enough
 - [ ] Optional LLM/cross-encoder reranker implementing the same protocol
 
@@ -104,3 +105,7 @@ extend it — candidate work below.
   config), ADR 0004. Tightened mypy to fully strict (fixed 6 issues) and made it
   blocking in CI. 59 tests green, ruff + mypy clean. Next: streaming `/ask`,
   examples, persisted API index.
+- 2026-06-12 — M6 (part 2): persisted API index (RAGFORGE_INDEX_PATH load on
+  startup + auto-save after ingest + `/save` endpoint); runnable
+  `examples/quickstart.py` end-to-end demo (ASCII-safe output). 63 tests green,
+  ruff + mypy clean. Next: streaming `/ask`, coverage gate.

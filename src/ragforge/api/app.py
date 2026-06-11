@@ -13,7 +13,9 @@ state, so the index persists across requests within a process. Build it with
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
 
 from ragforge.agent import RagAgent
 from ragforge.api.schemas import (
@@ -26,6 +28,7 @@ from ragforge.api.schemas import (
     IngestResponse,
     QueryRequest,
     QueryResponse,
+    SaveResponse,
 )
 from ragforge.config import Settings
 from ragforge.config import settings as default_settings
@@ -45,7 +48,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         version="0.1.0",
         description="Agentic RAG platform with a built-in evaluation harness, built on Claude.",
     )
-    pipeline = Pipeline(cfg)
+    # Load a persisted index on startup when configured and present.
+    if cfg.index_path and Path(cfg.index_path).exists():
+        try:
+            pipeline = Pipeline.from_index(cfg.index_path, cfg)
+            log.info("loaded index from %s (%d chunks)", cfg.index_path, len(pipeline.store))
+        except (FileNotFoundError, ValueError) as exc:
+            log.warning("could not load index %s: %s; starting empty", cfg.index_path, exc)
+            pipeline = Pipeline(cfg)
+    else:
+        pipeline = Pipeline(cfg)
     agent = RagAgent(pipeline, build_llm(cfg))
 
     @app.get("/health", response_model=HealthResponse)
@@ -55,6 +67,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             indexed_chunks=len(pipeline.store),
             model=cfg.model,
             live_llm=cfg.has_live_llm,
+            index_path=cfg.index_path,
         )
 
     @app.post("/ingest", response_model=IngestResponse)
@@ -62,7 +75,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         docs = [Document(id=d.id, text=d.text, metadata=d.metadata) for d in req.documents]
         added = pipeline.ingest(docs)
         log.info("ingested %d documents -> %d chunks via API", len(docs), added)
+        if cfg.index_path:  # auto-persist so the service survives restarts
+            pipeline.save_index(cfg.index_path)
         return IngestResponse(indexed_chunks=added, total_chunks=len(pipeline.store))
+
+    @app.post("/save", response_model=SaveResponse)
+    def save() -> SaveResponse:
+        if not cfg.index_path:
+            raise HTTPException(status_code=400, detail="No RAGFORGE_INDEX_PATH configured.")
+        pipeline.save_index(cfg.index_path)
+        return SaveResponse(saved=True, path=cfg.index_path, total_chunks=len(pipeline.store))
 
     @app.post("/query", response_model=QueryResponse)
     def query(req: QueryRequest) -> QueryResponse:

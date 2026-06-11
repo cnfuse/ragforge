@@ -74,3 +74,8 @@ class Pipeline:
     def retrieve(self, query: str, top_k: int | None = None) -> list[ScoredChunk]:
         """Retrieve the most relevant chunks for ``query``."""
         return self.retriever.retrieve(query, top_k=top_k or self.settings.top_k)
+
+    def save_index(self, path: str | Path) -> None:
+        """Persist the current index to ``path`` as JSON."""
+        self.store.save(path)
+        log.info("saved index (%d chunks) to %s", len(self.store), path)
