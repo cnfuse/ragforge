@@ -64,4 +64,5 @@ class HashingEmbedder:
         return out
 
     def embed_one(self, text: str) -> np.ndarray:
-        return self.embed([text])[0]
+        vector: np.ndarray = self.embed([text])[0]
+        return vector

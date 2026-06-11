@@ -79,7 +79,7 @@ class MockLLM:
 
         # Phase 1: a question with a search tool available -> ask to search.
         question = _last_user_text(content)
-        has_search = bool(tools) and any(t.name == _SEARCH_TOOL for t in tools)
+        has_search = tools is not None and any(t.name == _SEARCH_TOOL for t in tools)
         if has_search and question:
             call = ToolCall(id="mock-call-1", name=_SEARCH_TOOL, input={"query": question})
             return LLMResponse(

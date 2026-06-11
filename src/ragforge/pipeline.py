@@ -15,6 +15,7 @@ from ragforge.config import settings as default_settings
 from ragforge.embeddings import build_embedder
 from ragforge.ingestion.chunking import chunk_document
 from ragforge.logging import get_logger
+from ragforge.rerank import build_reranker
 from ragforge.retrieval.retriever import Retriever
 from ragforge.store.memory import InMemoryVectorStore
 from ragforge.types import Document, ScoredChunk
@@ -29,7 +30,15 @@ class Pipeline:
         self.settings = settings or default_settings
         self.embedder = build_embedder(self.settings)
         self.store = InMemoryVectorStore(dim=self.embedder.dim)
-        self.retriever = Retriever(self.embedder, self.store)
+        self.retriever = self._build_retriever(self.store)
+
+    def _build_retriever(self, store: InMemoryVectorStore) -> Retriever:
+        return Retriever(
+            self.embedder,
+            store,
+            reranker=build_reranker(self.settings),
+            fetch_multiplier=self.settings.rerank_fetch_multiplier,
+        )
 
     @classmethod
     def from_index(cls, path: str | Path, settings: Settings | None = None) -> Pipeline:
@@ -46,7 +55,7 @@ class Pipeline:
                 "re-ingest with the current embedding configuration"
             )
         pipeline.store = store
-        pipeline.retriever = Retriever(pipeline.embedder, store)
+        pipeline.retriever = pipeline._build_retriever(store)
         return pipeline
 
     def ingest(self, documents: list[Document]) -> int:

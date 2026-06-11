@@ -26,7 +26,8 @@ This repository is a portfolio piece demonstrating the breadth of the **AI
 Engineer** role end to end:
 
 - **RAG pipeline** — ingestion, paragraph-aware chunking, embeddings, a vector
-  store, and ranked retrieval, behind clean, swappable interfaces.
+  store, ranked retrieval, and an optional **hybrid (BM25 + embedding) reranking**
+  stage, behind clean, swappable interfaces.
 - **LLM integration** — Claude via the official Anthropic SDK, with adaptive
   thinking and graceful offline fallback.
 - **Agentic tool use** — the model decides when to search the corpus rather than

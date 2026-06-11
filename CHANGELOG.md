@@ -23,5 +23,8 @@ All notable changes to this project are documented here. The format is based on
 - **Documentation (M5):** full C4 architecture model (context, container,
   component, code) with Mermaid diagrams; ADRs; `CONTRIBUTING`; optional Voyage
   embedder.
+- **Reranking (M6):** optional two-stage retrieval — a `Reranker` protocol and a
+  hybrid BM25 + embedding `LexicalReranker`, config-driven and off by default
+  (ADR 0004). Strict, blocking `mypy` in CI.
 
 [Unreleased]: https://github.com/cnfuse/ragforge/commits/main

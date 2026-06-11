@@ -30,8 +30,8 @@ jobs:
       - name: Lint (ruff)
         run: ruff check .
 
-      - name: Type-check (mypy)
-        run: mypy || true   # advisory until strict typing is fully settled
+      - name: Type-check (mypy --strict)
+        run: mypy
 
       - name: Test (pytest)
         run: pytest --cov=ragforge --cov-report=term-missing

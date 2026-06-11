@@ -24,4 +24,5 @@ class Embedder(Protocol):
 
     def embed_one(self, text: str) -> np.ndarray:
         """Embed a single string and return a 1-D vector of length ``dim``."""
-        return self.embed([text])[0]
+        vector: np.ndarray = self.embed([text])[0]
+        return vector

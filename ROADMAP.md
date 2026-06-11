@@ -63,11 +63,13 @@ extend it — candidate work below.
 
 ### M6 — Hardening & extensions (backlog)
 - [ ] Persisted index reuse in the API (`/ingest` append + optional disk index)
-- [ ] Reranking stage (cross-encoder / LLM rerank) behind a `Reranker` protocol
+- [x] Reranking stage behind a `Reranker` protocol — hybrid BM25+embedding
+      `LexicalReranker`, optional two-stage retrieval, config-driven
+- [x] Tighten mypy to fully strict and make it blocking in CI
 - [ ] Streaming `/ask` (SSE) and CLI streaming output
 - [ ] `examples/` notebook or script demonstrating an end-to-end run
 - [ ] Coverage gate (fail under threshold) once suite is broad enough
-- [ ] Tighten mypy to fully strict and make it blocking in CI
+- [ ] Optional LLM/cross-encoder reranker implementing the same protocol
 
 ## Working agreement (for autonomous sessions)
 1. Read this file first; pick the next unchecked item(s).
@@ -97,3 +99,8 @@ extend it — candidate work below.
   Voyage embedder, factory tests (which caught & fixed a Settings alias bug).
   51 tests green, lint clean. **Planned roadmap M1–M5 done.** Next: M6 backlog
   (hardening: reranking, streaming, persisted API index, examples).
+- 2026-06-12 — M6 (part 1): two-stage retrieval — `Reranker` protocol + hybrid
+  BM25+embedding `LexicalReranker`, wired into Retriever/Pipeline (opt-in via
+  config), ADR 0004. Tightened mypy to fully strict (fixed 6 issues) and made it
+  blocking in CI. 59 tests green, ruff + mypy clean. Next: streaming `/ask`,
+  examples, persisted API index.

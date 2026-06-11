@@ -40,9 +40,10 @@ class VoyageEmbedder:
         arr = np.asarray(result.embeddings, dtype=np.float32)
         norms = np.linalg.norm(arr, axis=1, keepdims=True)
         norms[norms == 0] = 1.0
-        normalised = arr / norms
-        self._dim = normalised.shape[1]
+        normalised: np.ndarray = arr / norms
+        self._dim = int(normalised.shape[1])
         return normalised
 
     def embed_one(self, text: str) -> np.ndarray:
-        return self.embed([text])[0]
+        vector: np.ndarray = self.embed([text])[0]
+        return vector

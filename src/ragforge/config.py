@@ -44,6 +44,11 @@ class Settings(BaseSettings):
     # --- Retrieval --------------------------------------------------------
     top_k: int = 5
 
+    # --- Reranking (optional second stage) --------------------------------
+    rerank_enabled: bool = False
+    rerank_alpha: float = 0.5  # weight on embedding score vs BM25 in the blend
+    rerank_fetch_multiplier: int = 4  # first-pass candidates = top_k * this
+
     # --- Service ----------------------------------------------------------
     log_level: str = "INFO"
     host: str = "127.0.0.1"
