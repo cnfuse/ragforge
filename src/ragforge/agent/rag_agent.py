@@ -12,12 +12,13 @@ client and the offline :class:`~ragforge.llm.mock.MockLLM`.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any
 
 from ragforge.llm.base import LLM, ToolCall, ToolSpec
 from ragforge.logging import get_logger
 from ragforge.pipeline import Pipeline
-from ragforge.types import Answer, ScoredChunk
+from ragforge.types import AgentEvent, Answer, ScoredChunk
 
 log = get_logger("agent")
 
@@ -58,7 +59,26 @@ class RagAgent:
         self.max_steps = max_steps
 
     def answer(self, question: str) -> Answer:
-        """Answer ``question``, searching the corpus as needed, with citations."""
+        """Answer ``question``, searching the corpus as needed, with citations.
+
+        Thin wrapper over :meth:`iter_events`: drains the event stream and
+        returns the :class:`Answer` carried by the terminal event.
+        """
+        final: Answer | None = None
+        for event in self.iter_events(question):
+            if event.answer is not None:
+                final = event.answer
+        assert final is not None  # iter_events always emits a terminal answer
+        return final
+
+    def iter_events(self, question: str) -> Iterator[AgentEvent]:
+        """Run the agent loop, yielding progress events as they happen.
+
+        Yields ``search`` and ``results`` events per tool call and a terminal
+        ``answer`` (or ``budget_exhausted``) event carrying the final
+        :class:`Answer`. This is the single source of truth for the loop;
+        :meth:`answer` is built on top of it.
+        """
         messages: list[dict[str, Any]] = [{"role": "user", "content": question}]
         collected: dict[str, ScoredChunk] = {}
 
@@ -71,12 +91,17 @@ class RagAgent:
             )
 
             if not response.wants_tools:
-                return Answer(
-                    question=question,
-                    text=response.text or "(no answer produced)",
-                    citations=self._rank(collected),
-                    model=response.model,
+                yield AgentEvent(
+                    type="answer",
+                    step=step + 1,
+                    answer=Answer(
+                        question=question,
+                        text=response.text or "(no answer produced)",
+                        citations=self._rank(collected),
+                        model=response.model,
+                    ),
                 )
+                return
 
             # Reconstruct the assistant turn so the conversation stays valid.
             assistant_content: list[dict[str, Any]] = []
@@ -88,10 +113,15 @@ class RagAgent:
                 )
             messages.append({"role": "assistant", "content": assistant_content})
 
-            # Execute each requested tool call and feed results back.
+            # Execute each requested tool call, emitting events, and feed results back.
             results_content: list[dict[str, Any]] = []
             for call in response.tool_calls:
-                rendered = self._run_tool(call, collected)
+                query = str(call.input.get("query", "")).strip()
+                yield AgentEvent(type="search", step=step + 1, message=query)
+                rendered, n_hits = self._run_tool(call, collected)
+                yield AgentEvent(
+                    type="results", step=step + 1, message=query, data={"count": n_hits}
+                )
                 results_content.append(
                     {"type": "tool_result", "tool_use_id": call.id, "content": rendered}
                 )
@@ -99,29 +129,36 @@ class RagAgent:
             log.info("step %d: ran %d tool call(s)", step + 1, len(response.tool_calls))
 
         # Loop budget exhausted without a final answer.
-        return Answer(
-            question=question,
-            text="I was unable to converge on an answer within the step budget.",
-            citations=self._rank(collected),
-            model=getattr(self.llm, "model", None),
+        yield AgentEvent(
+            type="budget_exhausted",
+            step=self.max_steps,
+            answer=Answer(
+                question=question,
+                text="I was unable to converge on an answer within the step budget.",
+                citations=self._rank(collected),
+                model=getattr(self.llm, "model", None),
+            ),
         )
 
-    def _run_tool(self, call: ToolCall, collected: dict[str, ScoredChunk]) -> str:
+    def _run_tool(
+        self, call: ToolCall, collected: dict[str, ScoredChunk]
+    ) -> tuple[str, int]:
+        """Execute a tool call; return (rendered text for the LLM, hit count)."""
         if call.name != _SEARCH_TOOL.name:
-            return f"Error: unknown tool {call.name!r}."
+            return f"Error: unknown tool {call.name!r}.", 0
         query = str(call.input.get("query", "")).strip()
         top_k = int(call.input.get("top_k") or self.pipeline.settings.top_k)
         if not query:
-            return "Error: 'query' is required."
+            return "Error: 'query' is required.", 0
         hits = self.pipeline.retrieve(query, top_k=top_k)
         if not hits:
-            return "No relevant passages found in the corpus."
+            return "No relevant passages found in the corpus.", 0
         for hit in hits:
             # Keep the best score seen for each chunk across all searches.
             prev = collected.get(hit.chunk.id)
             if prev is None or hit.score > prev.score:
                 collected[hit.chunk.id] = hit
-        return self._render(hits)
+        return self._render(hits), len(hits)
 
     @staticmethod
     def _render(hits: list[ScoredChunk]) -> str:

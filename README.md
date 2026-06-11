@@ -113,6 +113,7 @@ docker build -t ragforge . && docker run -p 8000:8000 ragforge
 | POST   | `/ingest` | Add documents to the index                |
 | POST   | `/query`  | Retrieve relevant chunks                  |
 | POST   | `/ask`    | Answer a question with the agent          |
+| POST   | `/ask/stream` | Stream the agent's progress as SSE    |
 | POST   | `/save`   | Persist the current index to disk         |
 
 Interactive OpenAPI docs are served at `/docs`. Set `RAGFORGE_INDEX_PATH` to make

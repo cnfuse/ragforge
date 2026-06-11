@@ -42,3 +42,17 @@ class Answer(BaseModel):
     text: str
     citations: list[ScoredChunk] = Field(default_factory=list)
     model: str | None = None
+
+
+class AgentEvent(BaseModel):
+    """A progress event emitted while the agent works (for streaming).
+
+    ``type`` is one of ``search``, ``results``, ``answer``, or ``budget_exhausted``.
+    The terminal ``answer`` event carries the completed :class:`Answer`.
+    """
+
+    type: str
+    step: int = 0
+    message: str = ""
+    data: dict[str, int | str] = Field(default_factory=dict)
+    answer: Answer | None = None

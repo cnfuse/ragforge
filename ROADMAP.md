@@ -70,8 +70,9 @@ extend it — candidate work below.
 - [x] `examples/quickstart.py` — runnable end-to-end demo (ingest→query→ask→eval)
 - [x] Optional LLM reranker (`LLMReranker`, Claude-as-judge) on the same protocol;
       selected via `rerank_provider`
-- [ ] Streaming `/ask` (SSE) and CLI streaming output
+- [x] Streaming `/ask/stream` (SSE) — agent emits search/results/answer events
 - [ ] Coverage gate (fail under threshold) once suite is broad enough
+- [ ] CLI streaming output (consume the agent event stream)
 - [ ] Cross-encoder reranker variant
 
 ## Working agreement (for autonomous sessions)
@@ -115,3 +116,7 @@ extend it — candidate work below.
   JSON call, safe fallback) behind the same `Reranker` protocol; selectable via
   `rerank_provider=lexical|llm`. ADR 0004 updated. 72 tests green, ruff + mypy
   clean. Next: streaming `/ask`, coverage gate.
+- 2026-06-12 — M6 (part 4): streaming. Refactored the agent loop into
+  `iter_events()` (single source of truth; `answer()` drains it) emitting
+  search/results/answer `AgentEvent`s; added SSE `POST /ask/stream`. 76 tests
+  green, ruff + mypy clean. Next: coverage gate, CLI streaming.

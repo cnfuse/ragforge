@@ -13,9 +13,11 @@ state, so the index persists across requests within a process. Build it with
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 
 from ragforge.agent import RagAgent
 from ragforge.api.schemas import (
@@ -78,6 +80,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if cfg.index_path:  # auto-persist so the service survives restarts
             pipeline.save_index(cfg.index_path)
         return IngestResponse(indexed_chunks=added, total_chunks=len(pipeline.store))
+
+    @app.post("/ask/stream")
+    def ask_stream(req: AskRequest) -> StreamingResponse:
+        """Stream the agent's progress as Server-Sent Events.
+
+        Each event is ``data: <json AgentEvent>\\n\\n``; the terminal event has
+        type ``answer`` (or ``budget_exhausted``) and carries the full answer.
+        """
+
+        def gen() -> Iterator[str]:
+            for event in agent.iter_events(req.question):
+                yield f"data: {event.model_dump_json()}\n\n"
+
+        return StreamingResponse(gen(), media_type="text/event-stream")
 
     @app.post("/save", response_model=SaveResponse)
     def save() -> SaveResponse:
