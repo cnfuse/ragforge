@@ -83,6 +83,41 @@ def _cmd_ask(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_eval(args: argparse.Namespace) -> int:
+    import json
+
+    from ragforge.agent import RagAgent
+    from ragforge.eval import evaluate_answers, evaluate_retrieval, load_dataset
+    from ragforge.llm import build_llm
+    from ragforge.pipeline import Pipeline
+
+    try:
+        docs = load_path(args.corpus)
+        dataset = load_dataset(args.dataset)
+    except (FileNotFoundError, ValueError) as exc:
+        log.error("%s", exc)
+        return 1
+    if not docs:
+        log.error("no documents found at %s", args.corpus)
+        return 1
+
+    pipeline = Pipeline()
+    pipeline.ingest(docs)
+
+    if args.retrieval_only:
+        report = evaluate_retrieval(pipeline, dataset, k=args.top_k)
+    else:
+        agent = RagAgent(pipeline, build_llm(settings))
+        report = evaluate_answers(pipeline, agent, dataset, k=args.top_k)
+
+    print(report.summary())
+    if args.json_out:
+        with open(args.json_out, "w", encoding="utf-8") as fh:
+            json.dump(report.model_dump(), fh, indent=2)
+        log.info("wrote report to %s", args.json_out)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="ragforge", description=__doc__)
     parser.add_argument("--log-level", default=settings.log_level)
@@ -104,6 +139,16 @@ def build_parser() -> argparse.ArgumentParser:
     p_ask.add_argument("--index", default=_DEFAULT_INDEX, help="index path to search")
     p_ask.add_argument("--top-k", type=int, default=settings.top_k)
     p_ask.set_defaults(func=_cmd_ask)
+
+    p_eval = sub.add_parser("eval", help="evaluate retrieval and answer quality")
+    p_eval.add_argument("--corpus", required=True, help="path to a corpus file or directory")
+    p_eval.add_argument("--dataset", required=True, help="path to a JSONL QA dataset")
+    p_eval.add_argument("--top-k", type=int, default=settings.top_k)
+    p_eval.add_argument(
+        "--retrieval-only", action="store_true", help="skip answer generation"
+    )
+    p_eval.add_argument("--json-out", help="optional path to write the full report as JSON")
+    p_eval.set_defaults(func=_cmd_eval)
     return parser
 
 

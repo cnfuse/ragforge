@@ -1,0 +1,4 @@
+{"id": "q1", "question": "Which language guarantees memory safety without a garbage collector?", "relevant_doc_ids": ["rust.md"], "expected_substrings": ["memory safety"]}
+{"id": "q2", "question": "What neural network architecture introduced self-attention?", "relevant_doc_ids": ["transformers.md"], "expected_substrings": ["attention"]}
+{"id": "q3", "question": "Which readable language is popular for data science and machine learning?", "relevant_doc_ids": ["python.md"], "expected_substrings": ["python"]}
+{"id": "q4", "question": "What build tool does Rust use?", "relevant_doc_ids": ["rust.md"], "expected_substrings": ["cargo"]}

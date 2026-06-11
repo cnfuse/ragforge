@@ -34,13 +34,14 @@ RAG, LLM tool use, evals, API/CLI, testing, CI, and C4 architecture docs.
 - [x] `Pipeline.from_index` to load a saved index for answering
 - [x] Tests with the mock LLM (no network) — 30 tests total
 
-### M3 — Evaluation harness
-- [ ] `eval/dataset.py` — QA dataset schema + loader (JSONL)
-- [ ] `eval/retrieval_metrics.py` — hit-rate, recall@k, MRR, nDCG
-- [ ] `eval/answer_metrics.py` — grounding / citation-faithfulness checks
-- [ ] `eval/runner.py` — run a dataset through the pipeline, emit a report
-- [ ] CLI `eval` subcommand + sample dataset under `data/`
-- [ ] Tests for metrics on synthetic data
+### M3 — Evaluation harness ✅
+- [x] `eval/dataset.py` — QA dataset schema + JSONL loader
+- [x] `eval/retrieval_metrics.py` — hit-rate, recall@k, MRR, nDCG
+- [x] `eval/answer_metrics.py` — expected-match + grounding/faithfulness checks
+- [x] `eval/report.py` — typed `EvalReport` (aggregates + per-query rows)
+- [x] `eval/runner.py` — retrieval + answer evaluation over a dataset
+- [x] CLI `eval` subcommand + sample corpus & dataset under `data/sample/`
+- [x] Tests for metrics + runner on synthetic data (40 tests total)
 
 ### M4 — Service layer
 - [ ] `api/app.py` — FastAPI: `/health`, `/ingest`, `/query`, `/ask`
@@ -69,3 +70,8 @@ RAG, LLM tool use, evals, API/CLI, testing, CI, and C4 architecture docs.
   (adaptive thinking + effort), deterministic offline MockLLM, agentic
   search-and-answer loop with citations, `ask` CLI, `Pipeline.from_index`.
   30 tests green, lint clean. Next: M3 (evaluation harness).
+- 2026-06-12 — M3 complete: evaluation harness — JSONL dataset format, IR
+  metrics (hit-rate/recall@k/MRR/nDCG), answer expected-match + grounding,
+  typed report, runner, and `eval` CLI with a sample corpus/dataset. On the
+  sample set: retrieval 1.000 across the board, grounding 0.887. 40 tests
+  green, lint clean. Next: M4 (FastAPI service).
