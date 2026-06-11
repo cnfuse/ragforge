@@ -1,5 +1,10 @@
 # ragforge
 
+[![CI](https://github.com/cnfuse/ragforge/actions/workflows/ci.yml/badge.svg)](https://github.com/cnfuse/ragforge/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Built on Claude](https://img.shields.io/badge/LLM-Claude%20Opus%204.8-8A2BE2)](https://www.anthropic.com)
+
 > An agentic Retrieval-Augmented Generation platform with a built-in evaluation harness, built on Claude.
 
 `ragforge` is a compact but production-shaped RAG system. It ingests documents,
@@ -44,8 +49,9 @@ documents → │ Ingestion │ → │ Embedder │ → │ VectorStore │ ←
                                                             └───────────┘
 ```
 
-Full C4 model (Context → Container → Component → Code) lives in
-[`docs/architecture/`](docs/architecture/).
+Full C4 model (Context → Container → Component → Code), with Mermaid diagrams,
+lives in [`docs/architecture/`](docs/architecture/); design decisions are
+recorded as ADRs in [`docs/adr/`](docs/adr/).
 
 ## Install
 

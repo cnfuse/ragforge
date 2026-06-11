@@ -50,12 +50,24 @@ RAG, LLM tool use, evals, API/CLI, testing, CI, and C4 architecture docs.
 - [x] Multi-stage `Dockerfile` (non-root, healthcheck) + `.dockerignore`
 - [x] README: API + Docker + eval usage documented
 
-### M5 — Docs & polish
-- [ ] C4 docs: context, container, component, code (`docs/architecture/`)
-- [ ] Architecture decision records (`docs/adr/`)
-- [ ] `CONTRIBUTING.md`, `CHANGELOG.md`, badges in README
-- [ ] Voyage embedder implementation (`embeddings/voyage.py`)
-- [ ] Expand test coverage; wire coverage gate in CI
+### M5 — Docs & polish ✅
+- [x] C4 docs: context, container, component, code (`docs/architecture/`) w/ Mermaid
+- [x] Architecture decision records (`docs/adr/` — 3 ADRs)
+- [x] `CONTRIBUTING.md`, `CHANGELOG.md`, badges in README
+- [x] Voyage embedder implementation (`embeddings/voyage.py`)
+- [x] Expanded tests (factory/config selection); coverage reported in CI
+
+## Planned roadmap complete (M1–M5) 🎉
+The originally scoped platform is built. Future autonomous sessions harden and
+extend it — candidate work below.
+
+### M6 — Hardening & extensions (backlog)
+- [ ] Persisted index reuse in the API (`/ingest` append + optional disk index)
+- [ ] Reranking stage (cross-encoder / LLM rerank) behind a `Reranker` protocol
+- [ ] Streaming `/ask` (SSE) and CLI streaming output
+- [ ] `examples/` notebook or script demonstrating an end-to-end run
+- [ ] Coverage gate (fail under threshold) once suite is broad enough
+- [ ] Tighten mypy to fully strict and make it blocking in CI
 
 ## Working agreement (for autonomous sessions)
 1. Read this file first; pick the next unchecked item(s).
@@ -80,3 +92,8 @@ RAG, LLM tool use, evals, API/CLI, testing, CI, and C4 architecture docs.
   with pydantic schemas and OpenAPI docs, TestClient suite, multi-stage
   Dockerfile (non-root + healthcheck), README API/Docker docs. 47 tests green,
   lint clean. Next: M5 (C4 architecture docs + polish).
+- 2026-06-12 — M5 complete: full C4 architecture docs (context/container/
+  component/code, Mermaid) + 3 ADRs, CONTRIBUTING, CHANGELOG, README badges,
+  Voyage embedder, factory tests (which caught & fixed a Settings alias bug).
+  51 tests green, lint clean. **Planned roadmap M1–M5 done.** Next: M6 backlog
+  (hardening: reranking, streaming, persisted API index, examples).
