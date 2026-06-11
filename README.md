@@ -81,6 +81,9 @@ ragforge query "how does chunking work?" --index my_index.json --top-k 5
 
 # Let the agent answer (Claude if ANTHROPIC_API_KEY is set, else offline mock)
 ragforge ask "how does chunking work?" --index my_index.json
+
+# Stream the agent's progress (searching -> retrieved -> answer)
+ragforge ask "how does chunking work?" --index my_index.json --stream
 ```
 
 ## Evaluation

@@ -81,7 +81,21 @@ def _cmd_ask(args: argparse.Namespace) -> int:
         log.error("%s", exc)
         return 1
     agent = RagAgent(pipeline, build_llm(settings))
-    answer = agent.answer(args.question)
+
+    if args.stream:
+        answer = None
+        for event in agent.iter_events(args.question):
+            if event.type == "search":
+                print(f"  - searching: {event.message}")
+            elif event.type == "results":
+                print(f"  - retrieved {event.data.get('count', 0)} passage(s)")
+            if event.answer is not None:
+                answer = event.answer
+        print()
+    else:
+        answer = agent.answer(args.question)
+
+    assert answer is not None
     print(answer.text)
     if answer.citations:
         print("\nSources:")
@@ -146,6 +160,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_ask.add_argument("question", help="the question to answer")
     p_ask.add_argument("--index", default=_DEFAULT_INDEX, help="index path to search")
     p_ask.add_argument("--top-k", type=int, default=settings.top_k)
+    p_ask.add_argument(
+        "--stream", action="store_true", help="print the agent's progress as it works"
+    )
     p_ask.set_defaults(func=_cmd_ask)
 
     p_eval = sub.add_parser("eval", help="evaluate retrieval and answer quality")

@@ -46,6 +46,21 @@ def test_ask_uses_offline_agent(tmp_path: Path, capsys: pytest.CaptureFixture[st
     assert out.strip()  # an answer was printed
 
 
+def test_ask_stream_prints_progress(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    doc = _write_corpus(tmp_path)
+    index = tmp_path / "idx.json"
+    main(["ingest", str(doc), "--index", str(index)])
+
+    code = main(["ask", "what build tool does rust use?", "--index", str(index), "--stream"])
+    assert code == 0
+    out = capsys.readouterr().out
+    assert "searching:" in out
+    assert "retrieved" in out
+    assert out.strip()
+
+
 def test_query_missing_index_returns_error(tmp_path: Path) -> None:
     assert main(["query", "x", "--index", str(tmp_path / "nope.json")]) == 1
 

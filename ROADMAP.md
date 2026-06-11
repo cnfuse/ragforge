@@ -72,8 +72,9 @@ extend it — candidate work below.
       selected via `rerank_provider`
 - [x] Streaming `/ask/stream` (SSE) — agent emits search/results/answer events
 - [x] Coverage gate — `fail_under=90` (network adapters omitted); CLI now tested
-- [ ] CLI streaming output (consume the agent event stream)
+- [x] CLI streaming output — `ask --stream` consumes the agent event stream
 - [ ] Cross-encoder reranker variant
+- [ ] Hybrid dense+sparse first-pass retrieval
 
 ## Working agreement (for autonomous sessions)
 1. Read this file first; pick the next unchecked item(s).
@@ -124,3 +125,7 @@ extend it — candidate work below.
   two missing-file error paths in ingest/query), configured coverage to omit the
   network-only adapters, set `fail_under=90`. Coverage 95%, 84 tests green,
   ruff + mypy clean. Next: CLI streaming output, cross-encoder reranker.
+- 2026-06-12 — M6 (part 6): `ask --stream` consumes the agent's iter_events and
+  prints live search/retrieved progress before the answer (ASCII-safe output).
+  85 tests green, ruff + mypy clean. Next: cross-encoder reranker, hybrid
+  dense+sparse first-pass retrieval.
