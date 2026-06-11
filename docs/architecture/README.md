@@ -18,12 +18,14 @@ Architecture decisions are recorded separately as lightweight ADRs in
 ## One-paragraph summary
 
 ragforge is an agentic Retrieval-Augmented Generation platform. Documents are
-chunked, embedded, and indexed in a vector store; at query time a retriever finds
-the most relevant chunks, and an agent — driven by Claude through a tool-use loop
-— decides when to search and answers with citations. A built-in evaluation
-harness scores both retrieval and answer quality. The same core is exposed
-through a CLI and an HTTP API, and runs fully offline by default via a local
-deterministic embedder and a mock LLM.
+chunked, embedded, and indexed in both a dense vector store and a sparse BM25
+index; at query time a multi-stage retriever fuses dense and sparse rankings
+(Reciprocal Rank Fusion) and optionally reranks them, and an agent — driven by
+Claude through a tool-use loop — decides when to search and answers with
+citations, streaming its progress as events. A built-in evaluation harness scores
+both retrieval and answer quality. The same core is exposed through a CLI and an
+HTTP API, and runs fully offline by default via a local deterministic embedder
+and a mock LLM.
 
 ## Quality attributes the design optimises for
 

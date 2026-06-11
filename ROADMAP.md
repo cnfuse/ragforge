@@ -135,3 +135,7 @@ extend it — candidate work below.
   Reciprocal Rank Fusion in the Retriever (dense -> hybrid -> rerank pipeline),
   config-gated, rebuilt from persisted chunks on load. ADR 0005. Coverage 95%,
   92 tests green, ruff + mypy clean. Next: cross-encoder reranker, persist sparse.
+- 2026-06-12 — Docs: refreshed the C4 model (component + code diagrams +
+  overview) to include the rerank package, sparse/hybrid retrieval, and the
+  agent event stream — keeping the flagship architecture doc accurate as the
+  system grew. Docs-only; 92 tests green.

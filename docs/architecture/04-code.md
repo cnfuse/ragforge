@@ -45,10 +45,22 @@ classDiagram
         +search(vec, top_k) list~ScoredChunk~
     }
     class InMemoryVectorStore
+    class BM25Index {
+        +add(chunks)
+        +search(query, top_k) list~ScoredChunk~
+    }
+
+    class Reranker {
+        <<protocol>>
+        +rerank(query, candidates, top_k) list~ScoredChunk~
+    }
+    class LexicalReranker
+    class LLMReranker
 
     class Retriever {
         +index(chunks) int
         +retrieve(query, top_k) list~ScoredChunk~
+        -_rrf_fuse(dense, sparse, top_k)
     }
     class Pipeline {
         +Settings settings
@@ -63,41 +75,48 @@ classDiagram
     }
     class AnthropicLLM
     class MockLLM
-    class LLMResponse {
-        +str text
-        +list~ToolCall~ tool_calls
-        +str stop_reason
-        +bool wants_tools
-    }
 
     class RagAgent {
         +int max_steps
         +answer(question) Answer
+        +iter_events(question) Iterator~AgentEvent~
+    }
+    class AgentEvent {
+        +str type
+        +int step
+        +Answer answer
     }
 
     Embedder <|.. HashingEmbedder
     Embedder <|.. VoyageEmbedder
     VectorStore <|.. InMemoryVectorStore
+    Reranker <|.. LexicalReranker
+    Reranker <|.. LLMReranker
     LLM <|.. AnthropicLLM
     LLM <|.. MockLLM
 
     Retriever --> Embedder
     Retriever --> VectorStore
+    Retriever --> BM25Index : hybrid (optional)
+    Retriever --> Reranker : rerank (optional)
+    LLMReranker --> LLM
     Pipeline --> Retriever
-    Pipeline --> Embedder
-    Pipeline --> VectorStore
     RagAgent --> Pipeline
     RagAgent --> LLM
-    RagAgent ..> Answer : produces
+    RagAgent ..> AgentEvent : yields
+    AgentEvent o-- Answer
     Answer o-- ScoredChunk
     ScoredChunk o-- Chunk
 ```
 
 ## Sequence diagram — the agentic tool-use loop
 
-`RagAgent.answer()` runs a bounded loop. The model is offered a `search_corpus`
-tool and decides when to use it; the agent executes searches, feeds results back,
-and collects every retrieved chunk as evidence for the final answer.
+`RagAgent.iter_events()` runs a bounded loop and *yields* progress events; the
+model is offered a `search_corpus` tool and decides when to use it. The agent
+executes searches (each a full dense→hybrid→rerank retrieve), feeds results back,
+and collects every retrieved chunk as evidence. `answer()` simply drains this
+generator and returns the terminal event's `Answer`; the SSE endpoint and
+`ask --stream` forward the events themselves.
 
 ```mermaid
 sequenceDiagram
@@ -105,30 +124,39 @@ sequenceDiagram
     participant Agent as RagAgent
     participant LLM
     participant Pipeline
-    participant Store as VectorStore
+    participant Retriever
 
-    User->>Agent: answer("which language is memory safe?")
+    User->>Agent: iter_events("which language is memory safe?")
     loop until end_turn or max_steps
         Agent->>LLM: generate(system, messages, tools=[search_corpus])
         alt model requests a tool
             LLM-->>Agent: stop_reason=tool_use, ToolCall(search_corpus, query)
+            Agent-->>User: yield AgentEvent(type=search)
             Agent->>Pipeline: retrieve(query, top_k)
-            Pipeline->>Store: search(query_vector, top_k)
-            Store-->>Pipeline: ranked ScoredChunks
+            Pipeline->>Retriever: dense -> hybrid fuse -> rerank
+            Retriever-->>Pipeline: ranked ScoredChunks
             Pipeline-->>Agent: ScoredChunks
+            Agent-->>User: yield AgentEvent(type=results, count=n)
             Note over Agent: record chunks as citations<br/>append tool_result to messages
         else model answers
             LLM-->>Agent: stop_reason=end_turn, text
-            Agent-->>User: Answer(text, citations sorted by score)
+            Agent-->>User: yield AgentEvent(type=answer, Answer)
         end
     end
 ```
 
 ## Why these shapes
 
-- **Protocols over base classes.** `Embedder`, `VectorStore`, and `LLM` are
-  `typing.Protocol`s. Concrete types are structurally compatible without
+- **Protocols over base classes.** `Embedder`, `VectorStore`, `Reranker`, and
+  `LLM` are `typing.Protocol`s. Concrete types are structurally compatible without
   inheritance, which keeps providers decoupled and trivially mockable.
+- **Retrieval is staged, not branched at call sites.** `Retriever.retrieve`
+  internally runs dense search, optional RRF fusion with the `BM25Index`, and an
+  optional `Reranker` — callers (agent, CLI, API) see one method whatever the
+  configured depth.
+- **One streaming loop, three consumers.** `iter_events` is the single loop;
+  `answer()`, the SSE endpoint, and `ask --stream` are all thin consumers of it,
+  so behaviour can't drift between them.
 - **`LLMResponse.wants_tools`** centralises the "should I run tools?" decision
   (`stop_reason == "tool_use"` and at least one call), so the agent loop reads
   declaratively.
