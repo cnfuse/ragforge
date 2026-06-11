@@ -129,10 +129,14 @@ unlock Claude-backed answers.
 ## Development
 
 ```bash
-pytest            # run the test suite
+pytest            # run the test suite (coverage gate: fail under 90%)
 ruff check .      # lint
-mypy              # type-check
+mypy              # type-check (strict)
 ```
+
+The suite is hermetic — no network or API key — and currently sits at ~95%
+coverage. The two thin external adapters (Anthropic, Voyage) are exercised by
+integration, not unit tests, and are excluded from the gate.
 
 ## Status & roadmap
 

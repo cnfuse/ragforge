@@ -27,7 +27,11 @@ _DEFAULT_INDEX = ".ragforge_index.json"
 
 
 def _cmd_ingest(args: argparse.Namespace) -> int:
-    docs = load_path(args.path)
+    try:
+        docs = load_path(args.path)
+    except FileNotFoundError as exc:
+        log.error("%s", exc)
+        return 1
     if not docs:
         log.error("no readable documents found at %s", args.path)
         return 1
@@ -46,7 +50,11 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
 
 
 def _cmd_query(args: argparse.Namespace) -> int:
-    store = InMemoryVectorStore.load(args.index)
+    try:
+        store = InMemoryVectorStore.load(args.index)
+    except (FileNotFoundError, ValueError) as exc:
+        log.error("could not load index %s: %s", args.index, exc)
+        return 1
     embedder = build_embedder(settings)
     if embedder.dim != store.dim:
         log.error("embedder dim %d != index dim %d; re-ingest", embedder.dim, store.dim)

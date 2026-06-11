@@ -56,6 +56,19 @@ testpaths = ["tests"]
 addopts = "-ra -q"
 pythonpath = ["src"]
 
+[tool.coverage.run]
+source = ["ragforge"]
+# Thin adapters to external services — exercised via integration, not unit tests
+# (they require a live API key / network, which CI deliberately avoids).
+omit = [
+    "*/embeddings/voyage.py",
+    "*/llm/anthropic_client.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 90
+
 [tool.ruff]
 line-length = 100
 src = ["src", "tests"]

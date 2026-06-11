@@ -71,7 +71,7 @@ extend it — candidate work below.
 - [x] Optional LLM reranker (`LLMReranker`, Claude-as-judge) on the same protocol;
       selected via `rerank_provider`
 - [x] Streaming `/ask/stream` (SSE) — agent emits search/results/answer events
-- [ ] Coverage gate (fail under threshold) once suite is broad enough
+- [x] Coverage gate — `fail_under=90` (network adapters omitted); CLI now tested
 - [ ] CLI streaming output (consume the agent event stream)
 - [ ] Cross-encoder reranker variant
 
@@ -120,3 +120,7 @@ extend it — candidate work below.
   `iter_events()` (single source of truth; `answer()` drains it) emitting
   search/results/answer `AgentEvent`s; added SSE `POST /ask/stream`. 76 tests
   green, ruff + mypy clean. Next: coverage gate, CLI streaming.
+- 2026-06-12 — M6 (part 5): coverage gate. Added CLI test suite (caught & fixed
+  two missing-file error paths in ingest/query), configured coverage to omit the
+  network-only adapters, set `fail_under=90`. Coverage 95%, 84 tests green,
+  ruff + mypy clean. Next: CLI streaming output, cross-encoder reranker.
