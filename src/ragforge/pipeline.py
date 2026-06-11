@@ -18,6 +18,7 @@ from ragforge.logging import get_logger
 from ragforge.rerank import build_reranker
 from ragforge.retrieval.retriever import Retriever
 from ragforge.store.memory import InMemoryVectorStore
+from ragforge.store.sparse import BM25Index
 from ragforge.types import Document, ScoredChunk
 
 log = get_logger("pipeline")
@@ -33,11 +34,20 @@ class Pipeline:
         self.retriever = self._build_retriever(self.store)
 
     def _build_retriever(self, store: InMemoryVectorStore) -> Retriever:
+        sparse: BM25Index | None = None
+        if self.settings.hybrid_enabled:
+            sparse = BM25Index()
+            # Rebuild the sparse index from any chunks already in the store
+            # (e.g. when loading a persisted index via from_index).
+            if len(store):
+                sparse.add(store.chunks)
         return Retriever(
             self.embedder,
             store,
             reranker=build_reranker(self.settings),
+            sparse=sparse,
             fetch_multiplier=self.settings.rerank_fetch_multiplier,
+            rrf_k=self.settings.rrf_k,
         )
 
     @classmethod

@@ -30,6 +30,10 @@ All notable changes to this project are documented here. The format is based on
 - **Persistence & DX (M6):** durable API index (`RAGFORGE_INDEX_PATH`,
   load-on-startup, auto-save, `/save`); runnable `examples/quickstart.py`.
 - **Streaming (M6):** agent exposes `iter_events()` emitting
-  search/results/answer events; SSE endpoint `POST /ask/stream`.
+  search/results/answer events; SSE endpoint `POST /ask/stream`; CLI
+  `ask --stream`.
+- **Hybrid retrieval (M6):** optional BM25 `sparse` index fused with dense
+  retrieval via Reciprocal Rank Fusion (ADR 0005); composes with reranking.
+- **Quality gate (M6):** CLI test suite and a 90% coverage gate in CI.
 
 [Unreleased]: https://github.com/cnfuse/ragforge/commits/main

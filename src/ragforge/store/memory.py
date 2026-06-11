@@ -32,6 +32,11 @@ class InMemoryVectorStore:
     def __len__(self) -> int:
         return len(self._chunks)
 
+    @property
+    def chunks(self) -> list[Chunk]:
+        """The indexed chunks, in insertion order (read-only view)."""
+        return list(self._chunks)
+
     def add(self, chunks: list[Chunk], vectors: np.ndarray) -> None:
         if len(chunks) != vectors.shape[0]:
             raise ValueError("chunks and vectors must have the same length")

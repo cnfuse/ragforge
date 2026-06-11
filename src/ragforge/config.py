@@ -43,6 +43,9 @@ class Settings(BaseSettings):
 
     # --- Retrieval --------------------------------------------------------
     top_k: int = 5
+    # Hybrid retrieval: fuse dense (embedding) and sparse (BM25) rankings via RRF.
+    hybrid_enabled: bool = False
+    rrf_k: int = 60  # reciprocal-rank-fusion damping constant
 
     # --- Reranking (optional second stage) --------------------------------
     rerank_enabled: bool = False

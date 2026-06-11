@@ -73,8 +73,10 @@ extend it — candidate work below.
 - [x] Streaming `/ask/stream` (SSE) — agent emits search/results/answer events
 - [x] Coverage gate — `fail_under=90` (network adapters omitted); CLI now tested
 - [x] CLI streaming output — `ask --stream` consumes the agent event stream
+- [x] Hybrid dense+sparse first-pass retrieval — BM25 index fused with dense
+      via Reciprocal Rank Fusion (ADR 0005); composes with rerank
 - [ ] Cross-encoder reranker variant
-- [ ] Hybrid dense+sparse first-pass retrieval
+- [ ] Persist the sparse index alongside the dense index (currently rebuilt)
 
 ## Working agreement (for autonomous sessions)
 1. Read this file first; pick the next unchecked item(s).
@@ -129,3 +131,7 @@ extend it — candidate work below.
   prints live search/retrieved progress before the answer (ASCII-safe output).
   85 tests green, ruff + mypy clean. Next: cross-encoder reranker, hybrid
   dense+sparse first-pass retrieval.
+- 2026-06-12 — M6 (part 7): hybrid retrieval. BM25 `sparse` index +
+  Reciprocal Rank Fusion in the Retriever (dense -> hybrid -> rerank pipeline),
+  config-gated, rebuilt from persisted chunks on load. ADR 0005. Coverage 95%,
+  92 tests green, ruff + mypy clean. Next: cross-encoder reranker, persist sparse.
