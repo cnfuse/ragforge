@@ -48,6 +48,8 @@ class Pipeline:
             sparse=sparse,
             fetch_multiplier=self.settings.rerank_fetch_multiplier,
             rrf_k=self.settings.rrf_k,
+            mmr_enabled=self.settings.mmr_enabled,
+            mmr_lambda=self.settings.mmr_lambda,
         )
 
     @classmethod

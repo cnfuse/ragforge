@@ -11,6 +11,7 @@ from __future__ import annotations
 from ragforge.embeddings.base import Embedder
 from ragforge.logging import get_logger
 from ragforge.rerank.base import Reranker
+from ragforge.retrieval.mmr import mmr_select
 from ragforge.store.base import VectorStore
 from ragforge.store.sparse import BM25Index
 from ragforge.types import Chunk, ScoredChunk
@@ -42,6 +43,8 @@ class Retriever:
         sparse: BM25Index | None = None,
         fetch_multiplier: int = 4,
         rrf_k: int = 60,
+        mmr_enabled: bool = False,
+        mmr_lambda: float = 0.5,
     ) -> None:
         self.embedder = embedder
         self.store = store
@@ -49,6 +52,8 @@ class Retriever:
         self.sparse = sparse
         self.fetch_multiplier = max(1, fetch_multiplier)
         self.rrf_k = rrf_k
+        self.mmr_enabled = mmr_enabled
+        self.mmr_lambda = mmr_lambda
 
     def index(self, chunks: list[Chunk]) -> int:
         """Embed and add ``chunks`` to the dense store (and sparse index if any)."""
@@ -65,7 +70,7 @@ class Retriever:
         """Return the ``top_k`` chunks most relevant to ``query``."""
         if not query.strip():
             return []
-        multi_stage = self.sparse is not None or self.reranker is not None
+        multi_stage = self.sparse is not None or self.reranker is not None or self.mmr_enabled
         fetch_n = top_k * self.fetch_multiplier if multi_stage else top_k
 
         query_vector = self.embedder.embed_one(query)
@@ -77,8 +82,14 @@ class Retriever:
         else:
             candidates = dense
 
+        # Rerank the whole pool (keeps fetch_n) so a downstream MMR pass can
+        # diversify over a reordered candidate set.
         if self.reranker is not None:
-            return self.reranker.rerank(query, candidates, top_k=top_k)
+            candidates = self.reranker.rerank(query, candidates, top_k=fetch_n)
+
+        if self.mmr_enabled and candidates:
+            vectors = self.embedder.embed([c.chunk.text for c in candidates])
+            return mmr_select(candidates, vectors, top_k=top_k, lambda_=self.mmr_lambda)
         return candidates[:top_k]
 
     def _rrf_fuse(

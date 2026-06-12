@@ -34,6 +34,8 @@ All notable changes to this project are documented here. The format is based on
   `ask --stream`.
 - **Hybrid retrieval (M6):** optional BM25 `sparse` index fused with dense
   retrieval via Reciprocal Rank Fusion (ADR 0005); composes with reranking.
+- **MMR (M6):** optional Maximal Marginal Relevance final-selection stage to
+  reduce near-duplicate passages (ADR 0006).
 - **Quality gate (M6):** CLI test suite and a 90% coverage gate in CI.
 
 [Unreleased]: https://github.com/cnfuse/ragforge/commits/main

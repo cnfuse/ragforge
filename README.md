@@ -27,8 +27,9 @@ Engineer** role end to end:
 
 - **RAG pipeline** — ingestion, paragraph-aware chunking, embeddings, a vector
   store, ranked retrieval, optional **hybrid dense+sparse retrieval** (BM25 fused
-  with embeddings via Reciprocal Rank Fusion), and an optional **reranking** stage
-  (hybrid BM25+embedding or Claude-as-judge), behind clean, swappable interfaces.
+  with embeddings via Reciprocal Rank Fusion), optional **reranking** (hybrid
+  BM25+embedding or Claude-as-judge), and optional **MMR diversification** —
+  behind clean, swappable interfaces.
 - **LLM integration** — Claude via the official Anthropic SDK, with adaptive
   thinking and graceful offline fallback.
 - **Agentic tool use** — the model decides when to search the corpus rather than

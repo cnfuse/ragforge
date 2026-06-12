@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     # Hybrid retrieval: fuse dense (embedding) and sparse (BM25) rankings via RRF.
     hybrid_enabled: bool = False
     rrf_k: int = 60  # reciprocal-rank-fusion damping constant
+    # MMR diversification of the final selection (reduce near-duplicate passages).
+    mmr_enabled: bool = False
+    mmr_lambda: float = 0.5  # 1.0 = pure relevance, lower = more diverse
 
     # --- Reranking (optional second stage) --------------------------------
     rerank_enabled: bool = False

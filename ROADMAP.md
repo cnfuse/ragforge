@@ -75,8 +75,10 @@ extend it — candidate work below.
 - [x] CLI streaming output — `ask --stream` consumes the agent event stream
 - [x] Hybrid dense+sparse first-pass retrieval — BM25 index fused with dense
       via Reciprocal Rank Fusion (ADR 0005); composes with rerank
-- [ ] Cross-encoder reranker variant
+- [x] MMR diversification of the final selection (ADR 0006) — reduce redundancy
+- [ ] Cross-encoder reranker variant (likely as an omitted external adapter)
 - [ ] Persist the sparse index alongside the dense index (currently rebuilt)
+- [ ] Metadata filtering on retrieval
 
 ## Working agreement (for autonomous sessions)
 1. Read this file first; pick the next unchecked item(s).
@@ -139,3 +141,7 @@ extend it — candidate work below.
   overview) to include the rerank package, sparse/hybrid retrieval, and the
   agent event stream — keeping the flagship architecture doc accurate as the
   system grew. Docs-only; 92 tests green.
+- 2026-06-12 — M6 (part 8): MMR diversification. Optional final-selection stage
+  (`retrieval/mmr.py`) — relevance/diversity trade-off over candidate
+  embeddings; retriever order is now dense -> hybrid -> rerank -> MMR -> top-k.
+  ADR 0006. Coverage 95%, 99 tests green, ruff + mypy clean.
