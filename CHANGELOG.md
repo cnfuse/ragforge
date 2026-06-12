@@ -36,6 +36,8 @@ All notable changes to this project are documented here. The format is based on
   retrieval via Reciprocal Rank Fusion (ADR 0005); composes with reranking.
 - **MMR (M6):** optional Maximal Marginal Relevance final-selection stage to
   reduce near-duplicate passages (ADR 0006).
+- **Metadata filtering (M6):** optional `where` equality filter on retrieval,
+  threaded through the pipeline and the `/query` API.
 - **Quality gate (M6):** CLI test suite and a 90% coverage gate in CI.
 
 [Unreleased]: https://github.com/cnfuse/ragforge/commits/main

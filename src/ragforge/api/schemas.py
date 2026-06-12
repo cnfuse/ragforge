@@ -30,6 +30,9 @@ class IngestResponse(BaseModel):
 class QueryRequest(BaseModel):
     query: str = Field(min_length=1)
     top_k: int | None = Field(default=None, ge=1, le=100)
+    where: dict[str, str] | None = Field(
+        default=None, description="Optional metadata equality filter (all keys must match)."
+    )
 
 
 class Hit(BaseModel):

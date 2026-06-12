@@ -104,7 +104,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.post("/query", response_model=QueryResponse)
     def query(req: QueryRequest) -> QueryResponse:
-        hits = pipeline.retrieve(req.query, top_k=req.top_k)
+        hits = pipeline.retrieve(req.query, top_k=req.top_k, where=req.where)
         return QueryResponse(
             query=req.query,
             results=[

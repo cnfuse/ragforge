@@ -116,7 +116,7 @@ docker build -t ragforge . && docker run -p 8000:8000 ragforge
 | ------ | --------- | ----------------------------------------- |
 | GET    | `/health` | Liveness, index size, model info          |
 | POST   | `/ingest` | Add documents to the index                |
-| POST   | `/query`  | Retrieve relevant chunks                  |
+| POST   | `/query`  | Retrieve relevant chunks (optional metadata `where` filter) |
 | POST   | `/ask`    | Answer a question with the agent          |
 | POST   | `/ask/stream` | Stream the agent's progress as SSE    |
 | POST   | `/save`   | Persist the current index to disk         |

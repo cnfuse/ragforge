@@ -76,9 +76,10 @@ extend it — candidate work below.
 - [x] Hybrid dense+sparse first-pass retrieval — BM25 index fused with dense
       via Reciprocal Rank Fusion (ADR 0005); composes with rerank
 - [x] MMR diversification of the final selection (ADR 0006) — reduce redundancy
+- [x] Metadata filtering on retrieval — `where` equality filter (pipeline + API)
 - [ ] Cross-encoder reranker variant (likely as an omitted external adapter)
 - [ ] Persist the sparse index alongside the dense index (currently rebuilt)
-- [ ] Metadata filtering on retrieval
+- [ ] Metadata range/`in` filters beyond equality
 
 ## Working agreement (for autonomous sessions)
 1. Read this file first; pick the next unchecked item(s).
@@ -145,3 +146,7 @@ extend it — candidate work below.
   (`retrieval/mmr.py`) — relevance/diversity trade-off over candidate
   embeddings; retriever order is now dense -> hybrid -> rerank -> MMR -> top-k.
   ADR 0006. Coverage 95%, 99 tests green, ruff + mypy clean.
+- 2026-06-12 — M6 (part 9): metadata filtering. Optional `where` equality filter
+  threaded through Retriever/Pipeline and the `/query` API; widens the candidate
+  pool when active so top-k still fills. 105 tests green, coverage 95%, ruff +
+  mypy clean.

@@ -83,9 +83,15 @@ class Pipeline:
             )
         return self.retriever.index(chunks)
 
-    def retrieve(self, query: str, top_k: int | None = None) -> list[ScoredChunk]:
-        """Retrieve the most relevant chunks for ``query``."""
-        return self.retriever.retrieve(query, top_k=top_k or self.settings.top_k)
+    def retrieve(
+        self,
+        query: str,
+        top_k: int | None = None,
+        *,
+        where: dict[str, str] | None = None,
+    ) -> list[ScoredChunk]:
+        """Retrieve the most relevant chunks for ``query`` (optional metadata filter)."""
+        return self.retriever.retrieve(query, top_k=top_k or self.settings.top_k, where=where)
 
     def save_index(self, path: str | Path) -> None:
         """Persist the current index to ``path`` as JSON."""

@@ -66,18 +66,32 @@ class Retriever:
         log.info("indexed %d chunks (store now holds %d)", len(chunks), len(self.store))
         return len(chunks)
 
-    def retrieve(self, query: str, top_k: int = 5) -> list[ScoredChunk]:
-        """Return the ``top_k`` chunks most relevant to ``query``."""
+    def retrieve(
+        self,
+        query: str,
+        top_k: int = 5,
+        *,
+        where: dict[str, str] | None = None,
+    ) -> list[ScoredChunk]:
+        """Return the ``top_k`` chunks most relevant to ``query``.
+
+        ``where`` is an optional metadata filter: a chunk is kept only if its
+        metadata contains every given key with the matching value. When a filter
+        is active the candidate pool is widened to the whole store so enough
+        chunks survive filtering to fill ``top_k``.
+        """
         if not query.strip():
             return []
         multi_stage = self.sparse is not None or self.reranker is not None or self.mmr_enabled
         fetch_n = top_k * self.fetch_multiplier if multi_stage else top_k
+        if where:
+            fetch_n = max(fetch_n, len(self.store))
 
         query_vector = self.embedder.embed_one(query)
-        dense = self.store.search(query_vector, top_k=fetch_n)
+        dense = self._filter(self.store.search(query_vector, top_k=fetch_n), where)
 
         if self.sparse is not None:
-            sparse = self.sparse.search(query, top_k=fetch_n)
+            sparse = self._filter(self.sparse.search(query, top_k=fetch_n), where)
             candidates = self._rrf_fuse(dense, sparse, top_k=fetch_n)
         else:
             candidates = dense
@@ -91,6 +105,17 @@ class Retriever:
             vectors = self.embedder.embed([c.chunk.text for c in candidates])
             return mmr_select(candidates, vectors, top_k=top_k, lambda_=self.mmr_lambda)
         return candidates[:top_k]
+
+    @staticmethod
+    def _filter(
+        hits: list[ScoredChunk], where: dict[str, str] | None
+    ) -> list[ScoredChunk]:
+        """Keep only hits whose chunk metadata matches every key/value in ``where``."""
+        if not where:
+            return hits
+        return [
+            h for h in hits if all(h.chunk.metadata.get(k) == v for k, v in where.items())
+        ]
 
     def _rrf_fuse(
         self, dense: list[ScoredChunk], sparse: list[ScoredChunk], *, top_k: int
