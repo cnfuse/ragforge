@@ -77,6 +77,7 @@ extend it — candidate work below.
       via Reciprocal Rank Fusion (ADR 0005); composes with rerank
 - [x] MMR diversification of the final selection (ADR 0006) — reduce redundancy
 - [x] Metadata filtering on retrieval — `where` equality filter (pipeline + API)
+- [x] Eval ablation harness — compare dense/hybrid/rerank/mmr; `eval --compare`
 - [ ] Cross-encoder reranker variant (likely as an omitted external adapter)
 - [ ] Persist the sparse index alongside the dense index (currently rebuilt)
 - [ ] Metadata range/`in` filters beyond equality
@@ -150,3 +151,7 @@ extend it — candidate work below.
   threaded through Retriever/Pipeline and the `/query` API; widens the candidate
   pool when active so top-k still fills. 105 tests green, coverage 95%, ruff +
   mypy clean.
+- 2026-06-12 — M6 (part 10): eval ablation harness. `eval/compare.py` scores a
+  matrix of retrieval configs (dense/hybrid/hybrid+rerank/hybrid+mmr) on one
+  dataset and renders a comparison table; `eval --compare` CLI flag. Demonstrates
+  measure-don't-assume. 110 tests green, ruff + mypy clean.

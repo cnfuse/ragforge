@@ -8,6 +8,11 @@ checks, and a runner that produces a structured report.
 
 from __future__ import annotations
 
+from ragforge.eval.compare import (
+    compare_retrieval_configs,
+    default_matrix,
+    format_comparison,
+)
 from ragforge.eval.dataset import QAExample, load_dataset
 from ragforge.eval.report import EvalReport, RetrievalMetrics
 from ragforge.eval.runner import evaluate_answers, evaluate_retrieval
@@ -19,4 +24,7 @@ __all__ = [
     "RetrievalMetrics",
     "evaluate_retrieval",
     "evaluate_answers",
+    "compare_retrieval_configs",
+    "default_matrix",
+    "format_comparison",
 ]

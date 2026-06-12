@@ -123,6 +123,17 @@ def _cmd_eval(args: argparse.Namespace) -> int:
         log.error("no documents found at %s", args.corpus)
         return 1
 
+    if args.compare:
+        from ragforge.eval import (
+            compare_retrieval_configs,
+            default_matrix,
+            format_comparison,
+        )
+
+        results = compare_retrieval_configs(docs, dataset, default_matrix(), k=args.top_k)
+        print(format_comparison(results))
+        return 0
+
     pipeline = Pipeline()
     pipeline.ingest(docs)
 
@@ -171,6 +182,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("--top-k", type=int, default=settings.top_k)
     p_eval.add_argument(
         "--retrieval-only", action="store_true", help="skip answer generation"
+    )
+    p_eval.add_argument(
+        "--compare",
+        action="store_true",
+        help="compare retrieval configs (dense/hybrid/rerank/mmr) and print a table",
     )
     p_eval.add_argument("--json-out", help="optional path to write the full report as JSON")
     p_eval.set_defaults(func=_cmd_eval)

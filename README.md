@@ -102,6 +102,19 @@ Metrics: hit-rate, recall@k, MRR, nDCG for retrieval; expected-substring match
 and citation grounding for answers. Add `--json-out report.json` for a full
 per-query report.
 
+**Ablation:** compare retrieval configurations (dense vs hybrid vs reranked vs
+MMR) on the same dataset and let the numbers decide:
+
+```bash
+ragforge eval --corpus data/sample/corpus --dataset data/sample/qa.jsonl --compare
+# config              hit_rate   recall     mrr    ndcg
+# dense                  1.000    1.000   1.000   1.000  *
+# hybrid                 1.000    1.000   1.000   1.000
+# hybrid+rerank          1.000    1.000   1.000   1.000
+# hybrid+mmr             1.000    1.000   1.000   1.000
+```
+(Configs tie on the tiny bundled sample; differences emerge on real corpora.)
+
 ## HTTP API
 
 ```bash

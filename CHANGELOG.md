@@ -38,6 +38,8 @@ All notable changes to this project are documented here. The format is based on
   reduce near-duplicate passages (ADR 0006).
 - **Metadata filtering (M6):** optional `where` equality filter on retrieval,
   threaded through the pipeline and the `/query` API.
+- **Ablation harness (M6):** `eval/compare.py` + `eval --compare` score a matrix
+  of retrieval configurations on one dataset and render a comparison table.
 - **Quality gate (M6):** CLI test suite and a 90% coverage gate in CI.
 
 [Unreleased]: https://github.com/cnfuse/ragforge/commits/main
