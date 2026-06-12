@@ -155,3 +155,6 @@ extend it — candidate work below.
   matrix of retrieval configs (dense/hybrid/hybrid+rerank/hybrid+mmr) on one
   dataset and renders a comparison table; `eval --compare` CLI flag. Demonstrates
   measure-don't-assume. 110 tests green, ruff + mypy clean.
+- 2026-06-12 — M6 (part 11): ablation now reports mean query latency per config
+  (ConfigResult), turning it into a quality-vs-cost comparison. 110 tests green,
+  ruff + mypy clean.

@@ -9,6 +9,7 @@ checks, and a runner that produces a structured report.
 from __future__ import annotations
 
 from ragforge.eval.compare import (
+    ConfigResult,
     compare_retrieval_configs,
     default_matrix,
     format_comparison,
@@ -27,4 +28,5 @@ __all__ = [
     "compare_retrieval_configs",
     "default_matrix",
     "format_comparison",
+    "ConfigResult",
 ]

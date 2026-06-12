@@ -107,13 +107,15 @@ MMR) on the same dataset and let the numbers decide:
 
 ```bash
 ragforge eval --corpus data/sample/corpus --dataset data/sample/qa.jsonl --compare
-# config              hit_rate   recall     mrr    ndcg
-# dense                  1.000    1.000   1.000   1.000  *
-# hybrid                 1.000    1.000   1.000   1.000
-# hybrid+rerank          1.000    1.000   1.000   1.000
-# hybrid+mmr             1.000    1.000   1.000   1.000
+# config              hit_rate   recall     mrr    ndcg   ms/query
+# dense                  1.000    1.000   1.000   1.000       0.09  *
+# hybrid                 1.000    1.000   1.000   1.000       0.13
+# hybrid+rerank          1.000    1.000   1.000   1.000       0.21
+# hybrid+mmr             1.000    1.000   1.000   1.000       0.96
 ```
-(Configs tie on the tiny bundled sample; differences emerge on real corpora.)
+Quality *and* latency are reported, so you weigh the tradeoff. On the tiny
+bundled sample every config retrieves perfectly — so the extra stages only add
+latency; their quality benefit shows on larger, more confusable corpora.
 
 ## HTTP API
 

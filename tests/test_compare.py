@@ -36,15 +36,16 @@ def test_compare_returns_metrics_per_config() -> None:
     configs = {"dense": Settings(), "hybrid": Settings(hybrid_enabled=True)}
     results = compare_retrieval_configs(DOCS, DATASET, configs, k=3)
     assert set(results) == {"dense", "hybrid"}
-    for metrics in results.values():
-        assert metrics.k == 3
-        assert 0.0 <= metrics.ndcg <= 1.0
+    for res in results.values():
+        assert res.metrics.k == 3
+        assert 0.0 <= res.metrics.ndcg <= 1.0
+        assert res.mean_latency_ms >= 0.0
 
 
 def test_format_comparison_renders_table_and_marks_best() -> None:
     results = compare_retrieval_configs(DOCS, DATASET, default_matrix(), k=3)
     table = format_comparison(results)
-    assert "config" in table and "hit_rate" in table and "ndcg" in table
+    assert all(col in table for col in ("config", "hit_rate", "ndcg", "ms/query"))
     for name in default_matrix():
         assert name in table
     assert "*" in table  # best config is marked
